@@ -1,0 +1,21 @@
+{
+  "project_name": "hellouniverse",
+  "subsystems": [
+    {
+      "name": "helloworld-mg",
+      "chart_name": "unimon-agent-only",
+      "namespace": "helloworld-nt-sb-mg",
+      "cluster": "sber-simulation",
+      "datacenter": "mg",
+      "enabled": true
+    },
+    {
+      "name": "helloworld-gm",
+      "chart_name": "unimon-agent-only",
+      "namespace": "helloworld-nt-sb-gm",
+      "cluster": "sber-simulation",
+      "datacenter": "gm",
+      "enabled": true
+    }
+  ]
+}
