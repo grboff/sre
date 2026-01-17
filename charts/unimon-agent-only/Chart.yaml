@@ -1,0 +1,5 @@
+apiVersion: v2
+name: unimon-agent-only
+description: A custom monitoring agent for helloworld service with Vault and VMAgent
+version: 0.1.0
+appVersion: "1.87.6"

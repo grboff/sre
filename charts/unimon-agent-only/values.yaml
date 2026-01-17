@@ -1,0 +1,14 @@
+datacenter: mg # По умолчанию Мегацод
+
+agent:
+  image: "victoriametrics/vmagent:v1.87.6"
+  replicas: 1
+  requests:
+    cpu: "50m"
+    mem: "100Mi"
+  limits:
+    cpu: "100m"
+    mem: "200Mi"
+
+remote_write:
+  url: "http://vm-storage-victoria-metrics-single-server.monitoring-core.svc.cluster.local:8428/api/v1/write"

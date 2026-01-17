@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: unimon-agent
+    datacenter: {{ .Values.datacenter }}
+spec:
+  replicas: {{ .Values.agent.replicas }}
+  selector:
+    matchLabels:
+      app: unimon-agent
+  template:
+    metadata:
+      annotations:
+        # Та самая магия Vault Sidecar Injector
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: {{ .Release.Namespace }} # Роль совпадает с именем NS
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        # Путь к секрету, который в Vault
+        vault.hashicorp.com/agent-inject-secret-config: "secret/hellouniverse/helloworld/config"
+      labels:
+        app: unimon-agent
+    spec:
+      # Привязка к конкретному ЦОДу (Геобалансировка)
+      nodeSelector:
+        datacenter: {{ .Values.datacenter }}
+      
+      containers:
+        # Контейнер агента (VMAgent)
+        - name: agent
+          image: {{ .Values.agent.image }}
+          args:
+            - "-remoteWrite.url={{ .Values.remote_write.url }}"
+            - "-promscrape.config=/etc/vmagent/config.yml"
+          ports:
+            - containerPort: 8429
+          resources:
+            requests:
+              cpu: {{ .Values.agent.requests.cpu }}
+              memory: {{ .Values.agent.requests.mem }}
+            limits:
+              cpu: {{ .Values.agent.limits.cpu }}
+              memory: {{ .Values.agent.limits.mem }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/vmagent/
+      
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-config
