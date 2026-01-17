@@ -34,6 +34,7 @@ spec:
           args:
             - "-remoteWrite.url={{ .Values.remote_write.url }}"
             - "-promscrape.config=/etc/vmagent/config.yml"
+            - "-remoteWrite.label=datacenter={{ .Values.datacenter }}"
           ports:
             - containerPort: 8429
           resources:
@@ -46,6 +47,26 @@ spec:
           volumeMounts:
             - name: config-volume
               mountPath: /etc/vmagent/
+          # Имитация приложения
+        - name: hello-app
+          image: "python:3.9-slim"
+          # Эта команда запускает сервер, который отдает текст на 8080 порту
+          command: ["python3", "-c"]
+          args: 
+            - |
+              import http.server
+              import socketserver
+              class Handler(http.server.SimpleHTTPRequestHandler):
+                  def do_GET(self):
+                      self.send_response(200)
+                      self.send_header("Content-type", "text/plain")
+                      self.end_headers()
+                      # Имитируем формат метрик Prometheus
+                      self.wfile.write(b"helloworld_requests_total 100\n")
+              with socketserver.TCPServer(("", 8080), Handler) as httpd:
+                  httpd.serve_forever()
+          ports:
+            - containerPort: 8080
       
       volumes:
         - name: config-volume
